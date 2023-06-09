@@ -1,0 +1,30 @@
+pipeline{
+    agent{
+        node{
+            label'slave'
+        }
+    }   
+    stages{
+        stage('codecheckout'){
+            steps{
+                git 'https://github.com/mankinimbom/maven.git'
+            }
+        }
+        stage('codebuid'){
+            steps{
+                sh 'mvn package'
+            }
+        }
+        stage('codetest'){
+            steps{
+                git 'https://github.com/mankinimbom/testingproject.git'
+                sh 'java -jar /home/ubuntu/tomworkspace/workspace/Declarative-pipeline/testing.jar'
+            }
+        }
+        stage('codedeploy'){
+            steps{
+                deploy adapters: [tomcat9(credentialsId: 'tomcat9', path: '', url: 'http://172.31.29.23:8080')], contextPath: 'webapp', war: '**/*.war'
+            }
+        }
+    }
+}
